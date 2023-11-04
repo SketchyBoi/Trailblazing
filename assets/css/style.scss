@@ -1,90 +1,81 @@
----
----
+/* Global styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
 
-@import "{{ site.theme }}";
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-// STYLING PREFERNCES for SITE
-// mixin used as a template for buttons
-  @mixin button {
-    width: auto;
-    height: auto;
-    border-radius: 10px;
-    background-color: #21807c;
-    border: 3px solid black;
-    font-size: 1.5em;
+/* Header styles */
+header {
+  background-color: #1E88E5; /* Vibrant Blue */
+  color: #ffffff;
+  padding: 10px 0;
+  text-align: center;
+}
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+header h1 {
+  font-size: 24px;
+}
 
-    grid-column: span 1;
-    grid-row: span 1;
+/* Navigation menu styles */
+nav {
+  background-color: #FFA726; /* Vibrant Orange */
+  color: #ffffff;
+  padding: 10px 0;
+  text-align: center;
+}
 
-    // Creates smooth animation effect
-    transition: all 0.5s; 
-  }
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}
 
-  /* define class for redifined button */
-  .button {
-    @include button;
-  }
+nav li {
+  display: inline;
+  margin: 0 20px;
+}
 
-   /* darkens the background color on hover to create a selecting effect */
-  .button:hover {
-    background-color: #373737;
-  }
+nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 16px;
+}
 
-  /* "row style" is flexible size and aligns pictures in center */
-  .row {
-    align-items: center;
-    display: flex;
-  }
+/* Map section styles */
+.map-container {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
 
-  /* "column style" is one-third of the width with padding */
-  .column {
-    flex: 16.66%;
-    padding: 3px;
-  }
-  
-// STYLING FOR CALCULATOR
-  /* class to create the calculator's container; uses CSS grid dsiplay to partition off buttons */
-  .calculator-container { 
-    width: 90vw; /* this width and height is specified for mobile devices by default */
-    height: 80vh;
-    margin: 0 auto;
-  
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* fr is a special unit; learn more here: https://css-tricks.com/introduction-fr-css-unit/  */
-    grid-template-rows: 0.5fr repeat(4, 1fr);
-    gap: 10px 10px;
-  }
-  
-  @media (min-width: 600px) { 
-    .calculator-container {
-        width: 40vw;
-        height: 80vh;
-    }
-  }
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #F06292; /* Vibrant Pink */
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-  /* styling for the calculator number button */
-  .calculator-number {
-    @extend .button;
-  }
+.button:hover {
+  background-color: #D81B60; /* Darker Pink */
+}
 
-  /* styling for the calculator operation button */
-  .calculator-operation {
-    @extend .button;
-  }
-  
-  /* styling for the calculator clear button */
-  .calculator-clear {
-    @extend .button;
-    background-color: #e68b1c;
-  }
-  
-  /* styling for the calculator equals button */
-  .calculator-equals {
-    @extend .button;
-    background-color: #e70f0f;
-  }
-
+/* Footer styles */
+footer {
+  background-color: #1976D2; /* Dark Blue */
+  color: #ffffff;
+  padding: 10px 0;
+  text-align: center;
+}
