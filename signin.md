@@ -32,10 +32,12 @@ title: SignIn
         const login_url = "http://localhost:8084/authenticate";
         // prepare URL
         //var url = "https://spring.nighthawkcodingsociety.com/api/person/";
-        // localhost testing
-        const read_url = "http://localhost:8084/api/usr/";
-        const post_url = "http://localhost:8084/api/usr/post";
-        const put_url = "http://localhost:8084/api/usr/update";
+        // Uncomment next line for localhost testing
+        const read_url = "http://localhost:8084/api/person/";
+        //var url = "https://spring.nighthawkcodingsociety.com/api/person/";
+        // Uncomment next line for localhost testing
+        const post_url = "http://localhost:8084/api/person/post";
+        const put_url = "http://localhost:8084/api/person/update";
         let currentField = "emailField";
         function showNextField() {
             const emailField = document.getElementById("emailField");
@@ -46,7 +48,7 @@ title: SignIn
                 document.querySelector("button").textContent = "Log In";
             } else if (currentField === "passwordField") {
                 login_user();
-            }
+            }        
         const signinForm = document.getElementById("signinForm");
         signinForm.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -100,7 +102,10 @@ title: SignIn
     }
 }
         // Function to set a cookie
-        function setCookie(name, value) {
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
             document.cookie = name + "=" + value + ";" + expires + ";path=/";
         }
         // read
@@ -127,7 +132,7 @@ title: SignIn
                         // Only show the alert if the login was successful
                         alert("Successful Signin!");
                         // Redirect after alert
-                        window.location.href = "https://csa-tri-1.github.io/DADDiJkstra-frontend/pages/app";
+                        window.location.href = "http://127.0.0.1:4000/Trailblazing/index";
                         return;
                     } else {
                         const errorMsg = 'Database response error: ' + response.status;
@@ -174,5 +179,127 @@ title: SignIn
 *{
     margin: 0;
     padding: 0;
+}
+
+section{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background-position: center;
+    background-size: cover;
+    background-color: black;
+}
+
+.signin-box{
+    position: relative;
+    width: 400px;
+    height: 450px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+h2{
+    font-size: 2em;
+    color: white;
+    text-align: center;
+}
+
+form{
+    padding: 20px;
+    background: none;
+}
+
+.inputbox{
+    position: relative;
+    margin: 30px 0;
+    width: 310px;
+    border-bottom: 2px solid white;
+}
+
+.inputbox label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 1em;
+    pointer-events: none;
+    transition: 0.5s;
+}
+input:focus ~ label,
+input:valid ~ label{   
+    top: -5px;
+}
+
+.inputbox input {
+    width: 100%;
+    height: 50px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    padding:0 35px 0 5px;
+    color: white;
+}
+
+.inputbox ion-icon{
+    position: absolute;
+    right: 8px;
+    color: white;
+    font-size: 1.2em;
+    top: 20px;
+}
+
+button{
+    width: 100%;
+    height: 40px 0;
+    border-radius: 40px;
+    background: white;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.register{
+    font-size: 0.9em;
+    color: white;
+    text-align: center;
+    margin: 25px 0 ;
+}
+
+.register p a{
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+}
+
+.register p a:hover{
+    text-decoration: underline;
+}
+
+.goback{
+    font-size: 0.9em;
+    color: white;
+    text-align: center;
+    margin: 25px 0 ;
+}
+
+.goback p a{
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+}
+
+.goback p a:hover{
+    text-decoration: underline;
 }
 </style>
