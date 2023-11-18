@@ -13,6 +13,11 @@ title: Home
     <h1>Welcome to Our Website!</h1>
     <p>This is a simple welcome message. Feel free to explore our content.</p>
     <div id="counter">Counter: <span id="count">0</span></div>
+     <div>
+        <label for="fileInput">Upload Text File:</label>
+        <input type="file" id="fileInput" accept=".txt">
+        <button onclick="uploadFile()">Upload</button>
+    </div>
     <script>
         // JavaScript code to update the counter
         document.addEventListener('DOMContentLoaded', function () {
