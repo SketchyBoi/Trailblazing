@@ -64,10 +64,10 @@
         }
         // Issue tokens using the smart contract
         async function issueTokens() {
+            console.log("Check");
             const isConnected = await connectToBlockchain();
             if (!isConnected) return;
             const contractABI = await fetchContractABI();
-            console.log("Fetched ABI Successfully!");
             if (!contractABI) return;
             const contractAddress = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
             // Create a contract instance
