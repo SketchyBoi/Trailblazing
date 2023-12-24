@@ -5,8 +5,58 @@
       <ul>
         <li class="fork"><a href="{{site.baseurl}}/index">Home</a></li>
         <li class="fork"><a href="{{site.baseurl}}/signin">Login</a></li>
+        <li class="fork"><a href="{{site.baseurl}}/WeeklyGoal">Weekly Goals</a></li>
         <li class="title"><a href="{{ site.github.repository_url }}#readme">View On GitHub</a></li>
       </ul>
     </nav>
   </div><!-- end header -->
 </header>
+
+<style>
+  /* Reset some default styles */
+body, ul, li, a {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-decoration: none;
+}
+
+/* Basic styling for the header */
+.site-header {
+  background-color: #3a4be9;
+  color: #fff;
+  padding: 10px 0;
+}
+
+#header {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+nav ul {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav ul li {
+  margin-right: 20px;
+}
+
+nav ul li.title {
+  margin-left: 0px;
+}
+
+/* Style links */
+nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* Change link color on hover */
+nav a:hover {
+  color: #1d20ee;
+}
+
+</style>

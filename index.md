@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -12,10 +11,12 @@
 </head>
 
 <body>
-    <h1>Welcome to Our Website!</h1>
+    <h1>Upload your GPS Data</h1>
     <div>
         <button id="connectButton" onclick="connect()">Connect to MetaMask</button>
         <button onclick="issueTokens()">Issue Tokens</button>
+    </div>
+    <div>
         <label for="fileInput">Upload Text File:</label>
         <input type="file" id="fileInput" accept=".txt" />
         <button onclick="uploadFile()">Upload File</button>
@@ -65,5 +66,6 @@
 
 </script>
 </body>
+
 
 </html>
