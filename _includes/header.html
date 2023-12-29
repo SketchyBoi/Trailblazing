@@ -1,62 +1,74 @@
-<header class="site-header">
+<!DOCTYPE html>
+<html lang="en">
 
-  <div id="header">
-    <nav>
-      <ul>
-        <li class="fork"><a href="{{site.baseurl}}/index">Home</a></li>
-        <li class="fork"><a href="{{site.baseurl}}/signin">Login</a></li>
-        <li class="fork"><a href="{{site.baseurl}}/WeeklyGoal">Weekly Goals</a></li>
-        <li class="title"><a href="{{ site.github.repository_url }}#readme">View On GitHub</a></li>
-      </ul>
-    </nav>
-  </div><!-- end header -->
-</header>
+<head>
+    <!-- ... (your existing head content) ... -->
+</head>
 
-<style>
-  /* Reset some default styles */
-body, ul, li, a {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  text-decoration: none;
-}
+<body>
+    <header class="site-header">
+        <div id="header">
+            <nav>
+                <ul>
+                    <li class="fork"><a href="{{site.baseurl}}/index">Home</a></li>
+                    <li class="fork"><a href="{{site.baseurl}}/signin">Login</a></li>
+                    <li class="fork"><a href="{{site.baseurl}}/WeeklyGoal">Weekly Goals</a></li>                    
+                    <li class="fork"><a href="{{site.baseurl}}/issue">Issue Tokens</a></li>
+                    <li class="title"><a href="{{ site.github.repository_url }}#readme">View On GitHub</a></li>
+                </ul>
+            </nav>
+        </div><!-- end header -->
+    </header>
 
-/* Basic styling for the header */
-.site-header {
-  background-color: #3a4be9;
-  color: #fff;
-  padding: 10px 0;
-}
+    <style>
+      /* Reset some default styles */
+      body, ul, li, a {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          text-decoration: none;
+      }
+  
+      /* Basic styling for the header */
+      .site-header {
+          background: linear-gradient(to right, #2c3d64, #415c8e); /* Slightly darker background gradient */
+          color: #e0e0e0; /* Darker text color */
+          padding: 10px 0;
+      }
+  
+      #header {
+          max-width: 1200px;
+          margin: 0 auto;
+      }
+  
+      nav ul {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+  
+      nav ul li {
+          margin-right: 20px;
+          font-size: 1em; /* Adjust font size */
+      }
+  
+      nav ul li.title {
+          margin-left: 0;
+      }
+  
+      /* Style links */
+      nav a {
+          color: #e0e0e0; /* Darker link color */
+          text-decoration: none;
+          font-weight: bold;
+          font-size: 1em; /* Adjust font size */
+      }
+  
+      /* Change link color on hover */
+      nav a:hover {
+          color: #80a3cc; /* Darker button hover color */
+      }
+  </style>  
+</body>
 
-#header {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-nav ul {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-nav ul li {
-  margin-right: 20px;
-}
-
-nav ul li.title {
-  margin-left: 0px;
-}
-
-/* Style links */
-nav a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-/* Change link color on hover */
-nav a:hover {
-  color: #1d20ee;
-}
-
-</style>
+</html>

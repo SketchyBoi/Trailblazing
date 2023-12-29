@@ -11,17 +11,35 @@
 </head>
 
 <body>
-    <h1>Upload your GPS Data</h1>
-    <div>
-        <button id="connectButton" onclick="connect()">Connect to MetaMask</button>
-        <button onclick="issueTokens()">Issue Tokens</button>
-    </div>
-    <div>
-        <label for="fileInput">Upload Text File:</label>
-        <input type="file" id="fileInput" accept=".txt" />
-        <button onclick="uploadFile()">Upload File</button>
-    </div>
+     <section>
+        <div class="signin-box">
+            <h2>Upload your GPS Data</h2>
+            <p id="dayOfWeek" class="day-of-week">Today is </p>
+            <div>
+                <button id="connectButton" onclick="connect()">Connect to MetaMask</button>
+                <button onclick="issueTokens()">Issue Tokens</button>
+            </div>
+            <div class="inputbox">
+                <label for="fileInput">Upload Text File:</label>
+                <input type="file" id="fileInput" accept=".txt" />
+                <button onclick="uploadFile()">Upload File</button>
+            </div>
+        </div>
+    </section>
     <script>
+        function getDayOfWeek() {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const currentDate = new Date();
+            const dayIndex = currentDate.getDay();
+            return days[dayIndex];
+        }
+        function updateDayOfWeek() {
+            const dayOfWeekElement = document.getElementById('dayOfWeek');
+            dayOfWeekElement.textContent = `Today is ${getDayOfWeek()}`;
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            updateDayOfWeek();
+        });
         let selectedAccount = 0;
         let signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
         // Check if MetaMask is installed
@@ -56,16 +74,164 @@
                 signer
             );
             const toAddress = "0xfb3131da44E49C060fc15FfaA9d8c54412C1468A";
-            const amount = 1; // Assuming 18 decimals
+            const amount = 1000 * 1000 * 1000; // Assuming 18 decimals
             // Send transaction
             const tx = await trailblazeContract.mintTokens(toAddress, amount);
             // Wait for the transaction to be mined
             await tx.wait();
             console.log(`${amount} tokens sent to ${toAddress}`);
         }
+         function getEmailFromCookie() {
+            const name = "email=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookieArray = decodedCookie.split(';');
+            for (let i = 0; i < cookieArray.length; i++) {
+                let cookie = cookieArray[i];
+                while (cookie.charAt(0) === ' ') {
+                    cookie = cookie.substring(1);
+                }
+                if (cookie.indexOf(name) === 0) {
+                    return cookie.substring(name.length, cookie.length);
+                }
+            }
+            return "";
+        }
+        const storedEmail = getEmailFromCookie();
+        function editCheckDay(email, day, value) {
+            const apiUrl = `http://localhost:8084/api/person/editCheckDay?email=${encodeURIComponent(email)}&day=${encodeURIComponent(day)}&value=${encodeURIComponent(value.toString())}`;
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log(data); // Log the response from the backend
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const fileContent = e.target.result;
+                const containsDay = fileContent.includes(getDayOfWeek());
+                if (containsDay) {
+                    editCheckDay(storedEmail, getDayOfWeek(), true);
+                } else {
+                    console.log(`The uploaded file does not contain data for ${getDayOfWeek()}`);
+                }
+            };
+            reader.readAsText(file);
+        } else {
+            console.log('No file selected');
+        }
+    }
 
 </script>
 </body>
 
-
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Arial', sans-serif;
+    }
+    section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        width: 100%;
+        background: linear-gradient(to right, #141e30, #243b55);
+    }
+    .signin-box {
+        position: relative;
+        width: 400px;
+        height: 450px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        backdrop-filter: blur(15px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    h2 {
+        font-size: 2em;
+        color: white;
+        margin-bottom: 20px;
+    }
+    .inputbox {
+        margin: 20px 0;
+        width: 80%;
+    }
+    .inputbox label {
+        color: white;
+        font-size: 1em;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .inputbox input {
+        width: 100%;
+        height: 40px;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid white;
+        outline: none;
+        font-size: 1em;
+        padding: 5px;
+        color: white;
+    }
+    .signin-box button {
+        width: 80%;
+        height: 40px;
+        margin-top: 20px;
+        border-radius: 20px;
+        background: #3498db;
+        border: none;
+        outline: none;
+        font-size: 1em;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .signin-box button:hover {
+        background: #2980b9;
+    }
+    .register, .goback {
+        font-size: 0.9em;
+        color: white;
+        margin-top: 20px;
+    }
+    .register p a, .goback p a {
+        text-decoration: none;
+        color: #3498db;
+        font-weight: 600;
+    }
+    .register p a:hover, .goback p a:hover {
+        text-decoration: underline;
+    }
+    .day-of-week {
+        color: white;
+        font-size: 1em;
+        margin-bottom: 10px;
+    }
+</style>
 </html>
