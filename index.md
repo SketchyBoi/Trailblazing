@@ -1,87 +1,152 @@
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Page</title>
-    <!-- Connect Metamask -->
-    <script src="https://cdn.jsdelivr.net/npm/@metamask/detect-provider"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
-</head>
-
+---
+title: SignIn
+---
 <body>
-     <section>
+    <section>
         <div class="signin-box">
-            <h2>Upload your GPS Data</h2>
-            <p id="dayOfWeek" class="day-of-week">Today is </p>
-            <div>
-                <button id="connectButton" onclick="connect()">Connect to MetaMask</button>
-                <button onclick="issueTokens()">Issue Tokens</button>
-            </div>
-            <div class="inputbox">
-                <label for="fileInput">Upload Text File:</label>
-                <input type="file" id="fileInput" accept=".txt" />
-                <button onclick="uploadFile()">Upload File</button>
+            <div class="signin-value">
+                <form id="signinForm" autocomplete="off">
+                    <h2>Sign In</h2>
+                    <div class="inputbox" id="emailField" style="display: block;">
+                        <ion-icon name="mail-outline"></ion-icon>
+                        <input type="email" id="emailInput" name="email" required>
+                        <label for="emailInput">Email</label>
+                    </div>
+                    <div class="inputbox" id="passwordField" style="display: none;">
+                        <ion-icon name="lock-closed-outline"></ion-icon>
+                        <input type="password" id="passwordInput" name="password" required>
+                        <label for="passwordInput">Password</label>
+                    </div>
+                    <button onclick="showNextField()">Log In</button>
+                    <div class="register">
+                        <p>Don't have an account? <a href="{{ site.baseurl }}/pages/signup">Sign Up</a></p>
+                    </div>
+                    <div class="goback">
+                        <p>Want to go back the upload page? <a href="{{ site.baseurl }}/upload">Upload</a></p>
+                    </div>
+                </form>
             </div>
         </div>
     </section>
     <script>
-        function getDayOfWeek() {
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const currentDate = new Date();
-            const dayIndex = currentDate.getDay();
-            return days[dayIndex];
+        const login_url = "http://localhost:8084/authenticate";
+        // prepare URL
+        //var url = "https://spring.nighthawkcodingsociety.com/api/person/";
+        // Uncomment next line for localhost testing
+        const read_url = "http://localhost:8084/api/person/";
+        //var url = "https://spring.nighthawkcodingsociety.com/api/person/";
+        // Uncomment next line for localhost testing
+        const post_url = "http://localhost:8084/api/person/post";
+        const put_url = "http://localhost:8084/api/person/update";
+        let currentField = "emailField";
+        function showNextField() {
+            const emailField = document.getElementById("emailField");
+            const passwordField = document.getElementById("passwordField");
+            if (currentField === "emailField") {
+                currentField = "passwordField"
+                passwordField.style.display = "block";
+                document.querySelector("button").textContent = "Log In";
+            } else if (currentField === "passwordField") {
+                login_user();
+            }        
+        const signinForm = document.getElementById("signinForm");
+        signinForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        login_user(e);
+            })
         }
-        function updateDayOfWeek() {
-            const dayOfWeekElement = document.getElementById('dayOfWeek');
-            dayOfWeekElement.textContent = `Today is ${getDayOfWeek()}`;
-        }
-        document.addEventListener('DOMContentLoaded', function () {
-            updateDayOfWeek();
-        });
-        let selectedAccount = 0;
-        let signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-        // Check if MetaMask is installed
-        async function connect() {
-            if (typeof window.ethereum !== 'undefined') {
-            const connectButton = document.getElementById('connectButton');
-            // Handle button click event
-            connectButton.addEventListener('click', async () => {
-                try {
-                    // Request account access if needed
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    // Now MetaMask is connected, you can use window.ethereum to interact with the wallet
-                    // For example, you can get the selected account:
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    selectedAccount = accounts[0];
-                    console.log('Connected to MetaMask with account:', selectedAccount);
-                    // You can now perform actions with the connected account or interact with a smart contract
-                } catch (error) {
-                    console.error('Error connecting to MetaMask:', error);
-                }
-            });
-            } else {
-                console.error('MetaMask is not installed. Please install it to use this feature.');
+        function login_user(event) {
+            if (event) {
+            event.preventDefault();
+            // Set body to include login data
+            const emailInput = document.getElementById("emailInput");
+            const passwordInput = document.getElementById("passwordInput");
+            if (currentField === "emailField" && emailInput.value.trim() === "") {
+                alert("Please enter your email");
+                return;
+            } else if (currentField === "passwordField" && passwordInput.value.trim() === "") {
+                alert("Please enter your password");
+                return;
             }
+            // Set Headers to support cross-origin
+            const authBody = {
+                email: emailInput.value,
+                password: passwordInput.value
+            };
+            const authOptions = {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                // credentials: 'include',
+                body: JSON.stringify(authBody),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            };
+            // Fetch JWT 
+            fetch(login_url, authOptions)
+            .then(response => {
+                if (response.status === 401) {
+                    alert("Incorrect email or password :( Please try again!");
+                    console.log('Authentication failed');
+                } else if (response.ok) {
+                    // Successfully logged in, now set the email in a cookie
+                    setCookie("email", emailInput.value, 1); // Set the email cookie for an hour
+                    console.log('Successful fetch');
+                    read_pull();
+                }
+            })
+            .catch(error => {
+                console.error("Network error:", error);
+            });
+    }
+}
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
         }
-        async function issueTokens() {
-            const contractAddress = "0xc9cAA4263F8D662182a09a7d364BaE99BBeec719";
-            // Connect to the deployed contract
-            const trailblazeContract = new ethers.Contract(
-                contractAddress,
-                ['function mintTokens(address to, uint256 amount)'],
-                signer
-            );
-            const toAddress = "0xfb3131da44E49C060fc15FfaA9d8c54412C1468A";
-            const amount = 1000 * 1000 * 1000; // Assuming 18 decimals
-            // Send transaction
-            const tx = await trailblazeContract.mintTokens(toAddress, amount);
-            // Wait for the transaction to be mined
-            await tx.wait();
-            console.log(`${amount} tokens sent to ${toAddress}`);
+        // read
+        function read_pull() {
+            // Set options for cross-origin header request
+            const options = {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'default',
+                // credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            // Fetch the API
+            fetch(read_url, options)
+                .then(response => {
+                    if (response.status === 401) {
+                        alert("Bad password/username input");
+                        console.error("Bad password/username input");
+                        return;
+                    } else if (response.status === 200) {
+                        console.log("Success loser!");
+                        // Only show the alert if the login was successful
+                        alert("Successful Signin!");
+                        // Redirect after alert
+                        window.location.href = "http://127.0.0.1:4000/Trailblazing/upload";
+                        return;
+                    } else {
+                        const errorMsg = 'Database response error: ' + response.status;
+                        alert("Uh oh, something went wrong :(");
+                        console.error(errorMsg);
+                        return;
+                    }
+            })
+            .catch(error => {
+                // Handle network errors or exceptions here
+                console.error("Network error:", error);
+            });
         }
-         function getEmailFromCookie() {
+        function getEmailFromCookie() {
             const name = "email=";
             const decodedCookie = decodeURIComponent(document.cookie);
             const cookieArray = decodedCookie.split(';');
@@ -96,142 +161,145 @@
             }
             return "";
         }
+        // Example of how to use the getEmailFromCookie function
         const storedEmail = getEmailFromCookie();
-        function editCheckDay(email, day, value) {
-            const apiUrl = `http://localhost:8084/api/person/editCheckDay?email=${encodeURIComponent(email)}&day=${encodeURIComponent(day)}&value=${encodeURIComponent(value.toString())}`;
-            fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(data => {
-                console.log(data); // Log the response from the backend
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-    function uploadFile() {
-        const fileInput = document.getElementById('fileInput');
-        const file = fileInput.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const fileContent = e.target.result;
-                const containsDay = fileContent.includes(getDayOfWeek());
-                if (containsDay) {
-                    editCheckDay(storedEmail, getDayOfWeek(), true);
-                } else {
-                    console.log(`The uploaded file does not contain data for ${getDayOfWeek()}`);
-                }
-            };
-            reader.readAsText(file);
+        if (storedEmail) {
+            console.log("Email from cookie:", storedEmail);
         } else {
-            console.log('No file selected');
+            console.log("Email cookie not found");
         }
-    }
-
-</script>
+    </script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 
+<!-- Styles -->
+
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Arial', sans-serif;
-    }
-    section {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        width: 100%;
-        background: linear-gradient(to right, #141e30, #243b55);
-    }
-    .signin-box {
-        position: relative;
-        width: 400px;
-        height: 450px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.5);
-        border-radius: 20px;
-        backdrop-filter: blur(15px);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-    }
-    h2 {
-        font-size: 2em;
-        color: white;
-        margin-bottom: 20px;
-    }
-    .inputbox {
-        margin: 20px 0;
-        width: 80%;
-    }
-    .inputbox label {
-        color: white;
-        font-size: 1em;
-        margin-bottom: 8px;
-        display: block;
-    }
-    .inputbox input {
-        width: 100%;
-        height: 40px;
-        background: transparent;
-        border: none;
-        border-bottom: 2px solid white;
-        outline: none;
-        font-size: 1em;
-        padding: 5px;
-        color: white;
-    }
-    .signin-box button {
-        width: 80%;
-        height: 40px;
-        margin-top: 20px;
-        border-radius: 20px;
-        background: #3498db;
-        border: none;
-        outline: none;
-        font-size: 1em;
-        font-weight: 600;
-        color: white;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-    .signin-box button:hover {
-        background: #2980b9;
-    }
-    .register, .goback {
-        font-size: 0.9em;
-        color: white;
-        margin-top: 20px;
-    }
-    .register p a, .goback p a {
-        text-decoration: none;
-        color: #3498db;
-        font-weight: 600;
-    }
-    .register p a:hover, .goback p a:hover {
-        text-decoration: underline;
-    }
-    .day-of-week {
-        color: white;
-        font-size: 1em;
-        margin-bottom: 10px;
-    }
+*{
+    margin: 0;
+    padding: 0;
+}
+
+section{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background-position: center;
+    background-size: cover;
+    background-color: black;
+}
+
+.signin-box{
+    position: relative;
+    width: 400px;
+    height: 450px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+h2{
+    font-size: 2em;
+    color: white;
+    text-align: center;
+}
+
+form{
+    padding: 20px;
+    background: none;
+}
+
+.inputbox{
+    position: relative;
+    margin: 30px 0;
+    width: 310px;
+    border-bottom: 2px solid white;
+}
+
+.inputbox label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 1em;
+    pointer-events: none;
+    transition: 0.5s;
+}
+input:focus ~ label,
+input:valid ~ label{   
+    top: -5px;
+}
+
+.inputbox input {
+    width: 100%;
+    height: 50px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    padding:0 35px 0 5px;
+    color: white;
+}
+
+.inputbox ion-icon{
+    position: absolute;
+    right: 8px;
+    color: white;
+    font-size: 1.2em;
+    top: 20px;
+}
+
+button{
+    width: 100%;
+    height: 40px 0;
+    border-radius: 40px;
+    background: white;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.register{
+    font-size: 0.9em;
+    color: white;
+    text-align: center;
+    margin: 25px 0 ;
+}
+
+.register p a{
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+}
+
+.register p a:hover{
+    text-decoration: underline;
+}
+
+.goback{
+    font-size: 0.9em;
+    color: white;
+    text-align: center;
+    margin: 25px 0 ;
+}
+
+.goback p a{
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+}
+
+.goback p a:hover{
+    text-decoration: underline;
+}
 </style>
-</html>
