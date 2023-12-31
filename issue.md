@@ -37,6 +37,7 @@
         text-align: center;
     }
     h2 {
+        margin-left: 45px;
         font-size: 2em;
         color: white;
         margin-bottom: 20px;
@@ -101,45 +102,44 @@
 </head>
 
 <body>
-<h2>Issue tokens if you met your goals for this week</h2>
+<h2>Issue Tokens If Goals Were Met</h2>
 <section>
         <div class="signin-box">
             <h2>Get Your Weekly</h2>
             <h2>Rewards</h2>
             <div>
                 <button id="connectButton" onclick="connect()">Connect to MetaMask</button>
-                <button onclick="issueTokens()">Issue Tokens</button>
+                <button onclick="equals()">Issue Tokens</button>
             </div>
         </div>
     </section>
 </body>
-
+<script src="https://cdn.jsdelivr.net/npm/@metamask/detect-provider"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
 <script>
 let selectedAccount = 0;
-    let signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-    // Check if MetaMask is installed
-    async function connect() {
-        if (typeof window.ethereum !== 'undefined') {
-        const connectButton = document.getElementById('connectButton');
-        // Handle button click event
-        connectButton.addEventListener('click', async () => {
-            try {
-                // Request account access if needed
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                // Now MetaMask is connected, you can use window.ethereum to interact with the wallet
-                // For example, you can get the selected account:
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                selectedAccount = accounts[0];
-                console.log('Connected to MetaMask with account:', selectedAccount);
-                // You can now perform actions with the connected account or interact with a smart contract
-            } catch (error) {
-                console.error('Error connecting to MetaMask:', error);
-            }
-        });
-        } else {
-            console.error('MetaMask is not installed. Please install it to use this feature.');
+let signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+// Check if MetaMask is installed
+async function connect() {
+    if (typeof window.ethereum !== 'undefined') {
+    const connectButton = document.getElementById('connectButton');
+    // Handle button click event
+    connectButton.addEventListener('click', async () => {
+        try {
+            // Request account access if needed
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            selectedAccount = accounts[0];
+            console.log('Connected to MetaMask with account:', selectedAccount);
+        } catch (error) {
+            console.error('Error connecting to MetaMask:', error);
         }
+    });
+    } else {
+        console.error('MetaMask is not installed. Please install it to use this feature.');
     }
+}
 function getEmailFromCookie() {
     const name = "email=";
     const decodedCookie = decodeURIComponent(document.cookie);
@@ -156,6 +156,46 @@ function getEmailFromCookie() {
     return "";
 }
 const storedEmail = getEmailFromCookie();
+window.onload = function() {
+    if (!getEmailFromCookie()) {
+        window.location.href = '{{site.baseurl}}/index';
+    }
+}
+async function equals() {
+    const storedEmail = await getEmailFromCookie();
+    const statsUrl = `http://localhost:8084/api/person/getStats?email=${encodeURIComponent(storedEmail)}`;
+    const checkdayUrl = `http://localhost:8084/api/person/getCheckDay?email=${encodeURIComponent(storedEmail)}`;
+    // Make requests to the endpoints
+    const responseStats = await fetch(statsUrl);
+    const data1 = await responseStats.json();
+    const responseCheckday = await fetch(checkdayUrl);
+    const data2 = await responseCheckday.json();
+    const keys1 = Object.keys(data1);
+    const keys2 = Object.keys(data2);
+    let flag = true;
+    for (const day of keys2) {
+        // Ignore keys ending with "Minutes"
+        if (day.toLowerCase().endsWith("minutes")) {
+            continue;
+        }
+        const value1 = data1[day];
+        console.log(value1);
+        // Convert day to lowercase for case-insensitive comparison
+        const formattedDay = day.toLowerCase();
+        const value2 = data2[formattedDay];
+        console.log(value2);
+        if (value1 !== value2) {
+            console.log(`Values for ${day} are not equal.`);
+            flag = false;
+            return false;
+        }
+    }
+    if (flag)
+    {
+        console.log("All values are equal for corresponding days.");
+        issueTokens();
+    }
+}
 async function issueTokens() {
     const contractAddress = "0xc9cAA4263F8D662182a09a7d364BaE99BBeec719";
     // Connect to the deployed contract
@@ -164,12 +204,23 @@ async function issueTokens() {
         ['function mintTokens(address to, uint256 amount)'],
         signer
     );
-    const toAddress = "0xfb3131da44E49C060fc15FfaA9d8c54412C1468A";
-    const amount = 1000 * 1000 * 1000; // Assuming 18 decimals
-    // Send transaction
-    const tx = await trailblazeContract.mintTokens(toAddress, amount);
-    // Wait for the transaction to be mined
-    await tx.wait();
-    console.log(`${amount} tokens sent to ${toAddress}`);
+    // Fetch heldWeeklyTokens from the backend
+    const heldWeeklyTokensResponse = await fetch(`http://localhost:8084/api/person/getHeldWeeklyTokens?email=${encodeURIComponent(storedEmail)}`);
+     if (heldWeeklyTokensResponse.ok) {
+        const heldWeeklyTokens = await heldWeeklyTokensResponse.json();
+        // Assuming heldWeeklyTokens is a decimal, multiply by 10^18 (Wei) to convert to the smallest unit
+        const amount = heldWeeklyTokens * 1000000000;
+        // const amount = ethers.utils.parseUnits(heldWeeklyTokens.toString(), 'ether');
+        // Use the fetched amount to issue tokens
+        const toAddress = "0xfb3131da44E49C060fc15FfaA9d8c54412C1468A";
+        // Send transaction
+        const tx = await trailblazeContract.mintTokens(toAddress, amount);
+        // Wait for the transaction to be mined
+        await tx.wait();
+        console.log(`${amount} tokens sent to ${toAddress}`);
+    } else {
+        console.error('Error fetching heldWeeklyTokens:', heldWeeklyTokensResponse.status);
+    }
 }
+
 </script>

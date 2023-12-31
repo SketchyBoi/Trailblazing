@@ -42,6 +42,11 @@
             }
             return "";
         }
+        window.onload = function() {
+            if (!getEmailFromCookie()) {
+                window.location.href = '{{site.baseurl}}/index';
+            }
+        }
         const storedEmail = getEmailFromCookie();
         function editCheckDay(email, day, value) {
             const apiUrl = `http://localhost:8084/api/person/editCheckDay?email=${encodeURIComponent(email)}&day=${encodeURIComponent(day)}&value=${encodeURIComponent(value.toString())}`;
@@ -65,42 +70,66 @@
             });
         }
     function uploadFile() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const fileContent = e.target.result;
-            const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const containsDay = daysOfWeek.find(day => fileContent.includes(day));
-            if (containsDay) {
-                console.log(`File contains data for ${containsDay}`);
-                const lastLine = fileContent.trim().split('\n').pop();
-                const elapsedTimeInMinutes = parseFloat(lastLine.split(', ')[5]);
-                const url = `http://localhost:8084/api/person/getStats?email=${encodeURIComponent(storedEmail)}`;
-                // Make the fetch request
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        const dayKey = containsDay.toLowerCase();
-                        const isDayTrue = data[dayKey] === 'true';
-                        const dayMinutes = parseFloat(data[`${dayKey}Minutes`]);
-                        if (isDayTrue && elapsedTimeInMinutes >= dayMinutes) {
-                            console.log(`The time elapsed on ${containsDay} is greater than or equal to the associated day's minutes.`);                                            editCheckDay(storedEmail, containsDay, true);
-                        } else {
-                            console.log(`The time elapsed on ${containsDay} does not meet the criteria.`);
-                        }
-                    })
-                    .catch(error => console.error('Error fetching data from the API:', error));
-            } else {
-                console.log('The uploaded file does not contain data for any day of the week');
-            }
-        };
-        reader.readAsText(file);
-    } else {
-        console.log('No file selected');
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const fileContent = e.target.result;
+                const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const containsDay = daysOfWeek.find(day => fileContent.includes(day));
+                if (containsDay) {
+                    console.log(`File contains data for ${containsDay}`);
+                    const lastLine = fileContent.trim().split('\n').pop();
+                    const elapsedTimeInMinutes = parseFloat(lastLine.split(', ')[5]);
+                    const url = `http://localhost:8084/api/person/getStats?email=${encodeURIComponent(storedEmail)}`;
+                    // Make the fetch request
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            const dayKey = containsDay.toLowerCase();
+                            const isDayTrue = data[dayKey] === 'true';
+                            const dayMinutes = parseFloat(data[`${dayKey}Minutes`]);
+                            if (isDayTrue && elapsedTimeInMinutes >= dayMinutes) {
+                                console.log(`The time elapsed on ${containsDay} is greater than or equal to the associated day's minutes`);
+                                editCheckDay(storedEmail, containsDay, true);
+                                // Make a FormData object to send the file to the backend
+                                const formData = new FormData();
+                                formData.append('email', storedEmail);
+                                formData.append('file', file);
+                                // Make the fetch request to the backend endpoint
+                                fetch('http://localhost:8084/api/person/calculateReward', {
+                                    method: 'POST',
+                                    body: formData,
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error(`HTTP error! Status: ${response.status}`);
+                                        }
+                                        return response.text();
+                                    })
+                                    .then(data => {
+                                        console.log(data); // Log the response from the backend
+                                        // Handle the response as needed (e.g., display a message to the user)
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                    });
+                            } else {
+                                console.log(`The time elapsed on ${containsDay} does not meet the criteria.`);
+                            }
+                        })
+                        .catch(error => console.error('Error fetching data from the API:', error));
+                } else {
+                    console.log('The uploaded file does not contain data for any day of the week');
+                }
+            };
+            reader.readAsText(file);
+        } else {
+            console.log('No file selected');
+        }
     }
-}
+
         // let selectedAccount = 0;
         // let signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
         // // Check if MetaMask is installed
