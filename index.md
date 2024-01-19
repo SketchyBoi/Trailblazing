@@ -22,7 +22,7 @@ title: SignIn
                         <p>Don't have an account? <a href="{{ site.baseurl }}/pages/signup">Sign Up</a></p>
                     </div>
                     <div class="goback">
-                        <p>Want to go back the upload page? <a href="{{ site.baseurl }}/upload">Upload</a></p>
+                        <p>Want to go back the upload page? <a href="{{ site.baseurl }}/WeeklyGoal">Set Your Weekly Goal</a></p>
                     </div>
                 </form>
             </div>

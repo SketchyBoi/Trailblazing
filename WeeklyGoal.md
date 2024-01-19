@@ -207,53 +207,63 @@ h2 {
         }
     }
     document.getElementById('downloadBtn').addEventListener('click', function (event) {
-        event.preventDefault();
-        const data = {};
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            const correspondingSelect = document.getElementById(checkbox.id.replace("Checkbox", "Select"));
-            data[checkbox.id.replace("Checkbox", "")] = checkbox.checked;
-            data[correspondingSelect.id.replace("Select", "") + "Minutes"] = checkbox.checked ? correspondingSelect.value : 0;
-        });
+            event.preventDefault();
 
-        const jsonData = JSON.stringify(data, null, 2);
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
 
-        const blob = new Blob([jsonData], { type: 'application/json' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'weekly_plan.json';
-        link.click();
-        const storedEmail = getEmailFromCookie();
-        const url = `http://localhost:8084/api/person/setStats?email=${encodeURIComponent(storedEmail)}`;
-        fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            cache: 'no-cache',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: jsonData,
-        })
-            .then(response => response.json())
-            .then(data => console.log('Success:', data))
-            .catch(error => console.error('Error:', error));
-    });
+            if (checkedCheckboxes.length >= 3) {
+                const data = {};
 
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function () {
-            const correspondingSelect = document.getElementById(this.id.replace("Checkbox", "Select"));
-            correspondingSelect.disabled = !this.checked;
+                checkedCheckboxes.forEach(checkbox => {
+                    const correspondingSelect = document.getElementById(checkbox.id.replace("Checkbox", "Select"));
+                    data[checkbox.id.replace("Checkbox", "")] = checkbox.checked;
+                    data[correspondingSelect.id.replace("Select", "") + "Minutes"] = checkbox.checked ? correspondingSelect.value : 0;
+                });
 
-            const optionZero = correspondingSelect.querySelector('option[value="0"]');
-            if (optionZero) {
-                optionZero.remove();
-            } else if (!this.checked) {
-                correspondingSelect.insertAdjacentHTML('beforeend', '<option value="0">0</option>');
+                const jsonData = JSON.stringify(data, null, 2);
+
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'weekly_plan.json';
+                link.click();
+
+                const storedEmail = getEmailFromCookie();
+                const url = `http://localhost:8084/api/person/setStats?email=${encodeURIComponent(storedEmail)}`;
+
+                fetch(url, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: jsonData,
+                })
+                    .then(response => response.json())
+                    .then(data => console.log('Success:', data))
+                    .catch(error => console.error('Error:', error));
+            } else {
+                alert("Please check at least 3 boxes before submitting.");
             }
         });
-    });
-</script>
+
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const correspondingSelect = document.getElementById(this.id.replace("Checkbox", "Select"));
+                correspondingSelect.disabled = !this.checked;
+
+                const optionZero = correspondingSelect.querySelector('option[value="0"]');
+                if (optionZero) {
+                    optionZero.remove();
+                } else if (!this.checked) {
+                    correspondingSelect.insertAdjacentHTML('beforeend', '<option value="0">0</option>');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
