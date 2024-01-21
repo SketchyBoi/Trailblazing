@@ -130,7 +130,7 @@ title: SignIn
                     } else if (response.status === 200) {
                         console.log("Success loser!");
                         // Only show the alert if the login was successful
-                        alert("Successful Signin!");
+                        // alert("Successful Signin!");
                         // Redirect after alert
                         window.location.href = "http://127.0.0.1:4000/Trailblazing/upload";
                         return;
